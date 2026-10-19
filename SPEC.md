@@ -29,11 +29,11 @@ sample_index,status,workload_command,duration_sec,elapsed_sec,instructions_per_c
 
 ## Metrics
 
-- **#1: Instructions per cycle** — stored as `instructions_per_cycle_ipc`.
-- **#2: Branch misprediction rate, pct** — stored as `branch_misprediction_rate`.
-- **#3: Cache misses per 1,000 instructions** — stored as `cache_misses_per_1000_instructions`.
-- **#4: Pipeline stalls, pct** — stored as `pipeline_stall_pct`.
-- **#5: Ctx switches/s** — stored as `context_switches_during_workload_switches_s`.
+- **#1: Instructions per cycle, all commands combined** — stored as `instructions_per_cycle_ipc`.
+- **#2: Branch misprediction rate, all commands combined, pct** — stored as `branch_misprediction_rate`.
+- **#3: Cache misses per 1,000 instructions, all commands combined** — stored as `cache_misses_per_1000_instructions`.
+- **#4: Pipeline stalls, all commands combined, pct** — stored as `pipeline_stall_pct`.
+- **#5: Context switches per second, all commands combined** — stored as `context_switches_during_workload_switches_s`.
 
 ## Framework
 

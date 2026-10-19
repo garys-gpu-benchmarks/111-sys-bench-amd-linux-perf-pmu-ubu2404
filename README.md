@@ -90,19 +90,19 @@ Runs each yaml workload_commands entry under perf stat -x, and derives IPC, bran
 ## 2. What It Validates
 
 - Validates that each yaml stress-ng command completes under perf stat and that IPC, branch misprediction, cache-miss, pipeline-stall, and context-switch rates are parsed, or reported as na (<reason>) when the host does not expose a PMU counter
-- #1: Instructions per cycle (instructions_per_cycle_ipc); is present and physically sensible.
-- #2: Branch misprediction rate, pct (branch_misprediction_rate); is present and physically sensible.
-- #3: Cache misses per 1,000 instructions (cache_misses_per_1000_instructions); is present and physically sensible.
-- #4: Pipeline stalls, pct (pipeline_stall_pct); is present and physically sensible.
-- #5: Ctx switches/s (context_switches_during_workload_switches_s) is present and physically sensible.
+- #1: Instructions per cycle, all commands combined (instructions_per_cycle_ipc); is present and physically sensible.
+- #2: Branch misprediction rate, all commands combined, pct (branch_misprediction_rate); is present and physically sensible.
+- #3: Cache misses per 1,000 instructions, all commands combined (cache_misses_per_1000_instructions); is present and physically sensible.
+- #4: Pipeline stalls, all commands combined, pct (pipeline_stall_pct); is present and physically sensible.
+- #5: Context switches per second, all commands combined (context_switches_during_workload_switches_s) is present and physically sensible.
 
 ## 3. Metrics Captured
 
-- **#1: Instructions per cycle** — stored as `instructions_per_cycle_ipc`.
-- **#2: Branch misprediction rate, pct** — stored as `branch_misprediction_rate`.
-- **#3: Cache misses per 1,000 instructions** — stored as `cache_misses_per_1000_instructions`.
-- **#4: Pipeline stalls, pct** — stored as `pipeline_stall_pct`.
-- **#5: Ctx switches/s** — stored as `context_switches_during_workload_switches_s`.
+- **#1: Instructions per cycle, all commands combined** — stored as `instructions_per_cycle_ipc`.
+- **#2: Branch misprediction rate, all commands combined, pct** — stored as `branch_misprediction_rate`.
+- **#3: Cache misses per 1,000 instructions, all commands combined** — stored as `cache_misses_per_1000_instructions`.
+- **#4: Pipeline stalls, all commands combined, pct** — stored as `pipeline_stall_pct`.
+- **#5: Context switches per second, all commands combined** — stored as `context_switches_during_workload_switches_s`.
 
 ## 4. Hardware Requirements
 
@@ -192,7 +192,7 @@ Expected ranges and gates live in `config/benchmark_config.yaml` under `baseline
 Create cannot finish without `scripts/collect_workload.py`.
 
 **`self_check` overlay rewritten**
-Do not overwrite files listed in `results/overlay_lock.json`.
+`Locked overlay rewritten` means the sibling file and the `sha256` in `results/overlay_lock.json` disagree. The repair is to make `implementation_components/<component-id>/files/<path>`, the sibling path, and that digest the same bytes, then recheck with `create_one_workload.py --validate-only`. Do not replace the overlay with a new collector, and do not regenerate a non-empty sibling.
 
 **Remote SSH drop during setup**
 Reconnect and resume `bash setup.sh --assume-yes`. Do not wipe `.venv` or `.cache`.

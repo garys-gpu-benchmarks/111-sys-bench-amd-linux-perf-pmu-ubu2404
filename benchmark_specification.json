@@ -37,7 +37,7 @@
   {
     "field_name": "Metrics",
     "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
-    "value": "#1: Instructions per cycle (instructions_per_cycle_ipc); #2: Branch misprediction rate, pct (branch_misprediction_rate); #3: Cache misses per 1,000 instructions (cache_misses_per_1000_instructions); #4: Pipeline stalls, pct (pipeline_stall_pct); #5: Ctx switches/s (context_switches_during_workload_switches_s)"
+    "value": "#1: Instructions per cycle, all commands combined (instructions_per_cycle_ipc); #2: Branch misprediction rate, all commands combined, pct (branch_misprediction_rate); #3: Cache misses per 1,000 instructions, all commands combined (cache_misses_per_1000_instructions); #4: Pipeline stalls, all commands combined, pct (pipeline_stall_pct); #5: Context switches per second, all commands combined (context_switches_during_workload_switches_s)"
   },
   {
     "field_name": "Command Tools Executed",
