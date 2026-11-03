@@ -49,7 +49,6 @@ Workload options:
   --workload-commands <value>            Override workload_commands
   --event-list <value>            Override event_list
   --duration <value>            Override duration
-  --output-format <value>            Override output_format
 
 Information:
   --specification               Print this workload's specification and exit
@@ -87,7 +86,6 @@ NUM_CPUS=""
 WORKLOAD_COMMANDS=""
 EVENT_LIST=""
 DURATION=""
-OUTPUT_FORMAT=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -112,7 +110,6 @@ while [[ $# -gt 0 ]]; do
     --workload-commands) WORKLOAD_COMMANDS="${2:-}"; shift 2 ;;
     --event-list) EVENT_LIST="${2:-}"; shift 2 ;;
     --duration) DURATION="${2:-}"; shift 2 ;;
-    --output-format) OUTPUT_FORMAT="${2:-}"; shift 2 ;;
     --help|--specification|--matrix-definition) shift ;;
     *) die "Unknown option: $1" ;;
   esac
@@ -156,7 +153,6 @@ WORKLOAD_COMMANDS="${WORKLOAD_COMMANDS:-$(yaml_get workload_commands)}"
 EVENT_LIST="${EVENT_LIST:-$(yaml_get event_list)}"
 DURATION="${DURATION:-$(yaml_get duration)}"
 OUTPUT_FORMAT="${OUTPUT_FORMAT:-$(yaml_get output_format)}"
-OUTPUT_FORMAT="${OUTPUT_FORMAT:-$(yaml_get output_format)}"
 OUTPUT_FORMAT="${OUTPUT_FORMAT:-csv}"
 
 BENCHMARK_RUN_COMMAND="bash run_benchmark.sh --${PROFILE}"
@@ -165,7 +161,6 @@ BENCHMARK_RUN_COMMAND="bash run_benchmark.sh --${PROFILE}"
 [[ -n "${WORKLOAD_COMMANDS}" ]] && BENCHMARK_RUN_COMMAND+=" --workload-commands $(printf %q "${WORKLOAD_COMMANDS}")"
 [[ -n "${EVENT_LIST}" ]] && BENCHMARK_RUN_COMMAND+=" --event-list $(printf %q "${EVENT_LIST}")"
 [[ -n "${DURATION}" ]] && BENCHMARK_RUN_COMMAND+=" --duration $(printf %q "${DURATION}")"
-[[ -n "${OUTPUT_FORMAT}" ]] && BENCHMARK_RUN_COMMAND+=" --output-format $(printf %q "${OUTPUT_FORMAT}")"
 set_benchmark_run_command "${BENCHMARK_RUN_COMMAND}"
 
 HOSTNAME_VALUE="$(hostname -s 2>/dev/null || hostname)"
@@ -212,7 +207,6 @@ run_collection() {
   grep -q -- '--workload-commands' <<<"${help}" && collect_args+=(--workload-commands "${WORKLOAD_COMMANDS}")
   grep -q -- '--event-list' <<<"${help}" && collect_args+=(--event-list "${EVENT_LIST}")
   grep -q -- '--duration' <<<"${help}" && collect_args+=(--duration "${DURATION}")
-  grep -q -- '--output-format' <<<"${help}" && collect_args+=(--output-format "${OUTPUT_FORMAT}")
 
   printf -v collect_cmd '%q ' "${PYTHON_BIN}" scripts/collect_workload.py "${collect_args[@]}"
   echo "[RUN] ${collect_cmd}"

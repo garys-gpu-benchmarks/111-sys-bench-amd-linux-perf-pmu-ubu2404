@@ -27,4 +27,3 @@ sweep:
     smoke: 2
     baseline: 70
     extended: 150
-  output_format: csv
