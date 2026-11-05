@@ -18,7 +18,7 @@ Linux perf PMU Analysis Harness
 perf stat -x, -o <run>/perf_N.csv -e cycles,instructions,branches,branch-misses,cache-misses,context-switches,<stall event>,<event_list> -- <workload command>. Stall event: cycle_activity.stalls_total on Intel, stalled-cycles-backend on AMD (BENCHMARK_PMU_STALL_EVENT overrides). If perf cannot open its events, the command runs without perf, the four PMU metrics read na (<reason>), and context switches come from getrusage
 
 ## Main Goal
-Analyze low-level CPU microarchitecture behavior (IPC, branch prediction, cache misses, pipeline stalls) under yaml stress-ng loads
+Analyze CPU IPC, branch, cache, and stall behavior under load
 
 ## Validation Objective
 Validates that each yaml stress-ng command completes under perf stat and that IPC, branch misprediction, cache-miss, pipeline-stall, and context-switch rates are parsed, or reported as na (<reason>) when the host does not expose a PMU counter
