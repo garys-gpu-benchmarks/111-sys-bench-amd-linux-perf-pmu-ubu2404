@@ -16,7 +16,7 @@ Runs each yaml workload_commands entry under perf stat -x, and derives IPC, bran
 ## Invocation
 
 ```bash
-Run apt installed Linux perf (linux-tools-$(uname -r)) as perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command. stress-ng is the workload generator
+Run perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command
 ```
 
 ## Raw Output Format
@@ -45,7 +45,7 @@ perf stat -x, -o <run>/perf_N.csv -e cycles,instructions,branches,branch-misses,
 ## Platform Portability
 
 - **AMD (primary):** ```bash
-Run apt installed Linux perf (linux-tools-$(uname -r)) as perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command. stress-ng is the workload generator
+Run perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command
 ```
 - **NVIDIA:** Primary target is AMD ROCm. NVIDIA notes in this section are reference only and are not the execution path.
 

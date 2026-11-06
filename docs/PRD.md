@@ -21,7 +21,7 @@ perf stat -x, -o <run>/perf_N.csv -e cycles,instructions,branches,branch-misses,
 Analyze CPU IPC, branch, cache, and stall behavior under load
 
 ## Validation Objective
-Validates that each yaml stress-ng command completes under perf stat and that IPC, branch misprediction, cache-miss, pipeline-stall, and context-switch rates are parsed, or reported as na (<reason>) when the host does not expose a PMU counter
+Validates perf-stat IPC, mispredict, cache-miss, stall, and context-switch rates, or na if a counter is missing
 
 ## Workload Category
 System Profiling & Performance Analysis
