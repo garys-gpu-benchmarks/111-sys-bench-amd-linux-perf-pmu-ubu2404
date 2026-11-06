@@ -3,9 +3,11 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![CI](https://github.com/garys-gpu-benchmarks/111-sys-bench-amd-linux-perf-pmu-ubu2404/actions/workflows/ci.yml/badge.svg)](https://github.com/garys-gpu-benchmarks/111-sys-bench-amd-linux-perf-pmu-ubu2404/actions/workflows/ci.yml)
 
-Target: Ubuntu 24.04 · AMD · see Hardware Requirements. This is a host benchmark, not a laptop `pip install` project.
+Analyzes CPU IPC, branch, cache, and stall behavior under load. Workload 111 of the AMD Ubuntu 24.04 bundle. This is a CPU benchmark: no GPU is used.
 
 ## Quick Start
+
+On an Ubuntu 24.04 host, as root or with sudo:
 
 ```bash
 git clone https://github.com/garys-gpu-benchmarks/111-sys-bench-amd-linux-perf-pmu-ubu2404.git
@@ -13,225 +15,103 @@ cd 111-sys-bench-amd-linux-perf-pmu-ubu2404
 sudo bash setup.sh --assume-yes
 bash run_benchmark.sh --smoke
 ```
-Results are written to `results/benchmark.db` and `results/summary.json`.
 
-This workload is executed on the validation host after the repository is copied there. `setup.sh` and `run_benchmark.sh` do not open an outbound SSH session.
+`run_benchmark.sh` runs setup by itself if it has not been run yet. Each run prints its metrics when it finishes.
 
-Prerequisites: Ubuntu 24.04; AMD; Python 3.14.8 (uv-managed CPython from `uv python install 3.14`; all benchmark venvs). System Python 3.12.3 retained for OS and setup scripts only; root or sudo for `setup.sh`. Framework: Bash, SQLite, Python, PyYAML, Linux PMU, stress-ng. This is a host benchmark, not a laptop `pip install` project.
+## Profiles and Parameters
 
-```mermaid
-flowchart LR
-  setup.sh --> run_benchmark.sh --> parse_results.py --> results/benchmark.db
-```
+| Parameter | Flag | smoke | baseline | extended |
+|---|---|---|---|---|
+| `num_cpus` | `--num-cpus` | 1 | 2 | 4 |
+| `workload_commands` | `--workload-commands` | 2 items | 3 items | 4 items |
+| `event_list` | `--event-list` | 16 items | 16 items | 16 items |
+| `duration` | `--duration` | 2 | 70 | 150 |
 
-## Download as a Bundle
+Long list values are shown as item counts; the full lists are in `config/benchmark_config.yaml`.
 
-This repository is one of the 32 workloads in the AMD Ubuntu 24.04 bundle, [`bundle-amd-ubuntu-2404`](https://github.com/garys-gpu-benchmarks/bundle-amd-ubuntu-2404), which holds them as git submodules pinned to a release. To put every workload for this platform on a GPU host in one step, run this as root (or put `sudo` in front of the `apt-get` and `git clone` commands):
-
-```bash
-apt-get update && apt-get install -y git
-git clone --recurse-submodules https://github.com/garys-gpu-benchmarks/bundle-amd-ubuntu-2404 /opt/benchmarks \
-  && cd /opt/benchmarks \
-  && ./run_benchmark_suite.sh --list \
-  && cd /opt/benchmarks/111-sys-bench-amd-linux-perf-pmu-ubu2404 \
-  && bash run_benchmark.sh --smoke \
-  && cd /opt/benchmarks \
-  && echo "Done: 32 workloads in /opt/benchmarks; 111-sys-bench-amd-linux-perf-pmu-ubu2404 smoke run passed. Next: ./run_benchmark_suite.sh --help"
-```
-
-Every line in `./run_benchmark_suite.sh --list` should show `ready`; it exits with an error if any workload is not fetched. The commands are joined with `&&`, so if the clone, the list or the smoke run fails, the chain stops there, and the closing message appears only when everything succeeded. The chain ends in `/opt/benchmarks`, where the suite runner is. For more extensive testing:
+Pick a profile with `--smoke` (default), `--baseline` or `--extended`. Any flag in the table overrides that profile's value:
 
 ```bash
-./run_benchmark_suite.sh --smoke                  # smoke test of all 32 workloads
-./run_benchmark_suite.sh -w 107 --baseline        # workload 107, baseline profile
-./run_benchmark_suite.sh --help                   # all options
+bash run_benchmark.sh --baseline --num-cpus 1
+bash run_benchmark.sh --help        # every option
 ```
 
-A workload that is not set up yet sets itself up on its first run (its `run_benchmark.sh` calls `scripts/ensure_setup.sh`). See [Suite Tools](#suite-tools) for more.
+Profile values live in `config/benchmark_config.yaml`.
 
-To move to the newest published release later: `cd /opt/benchmarks && git pull && git submodule update --init --recursive`.
+## Metrics
 
-| Bundle repository | Platform | Workloads |
+| # | Metric | Key |
 |---|---|---|
-| [`bundle-amd-ubuntu-2404`](https://github.com/garys-gpu-benchmarks/bundle-amd-ubuntu-2404) | AMD · Ubuntu 24.04 | 101–132 |
-| [`bundle-nvidia-ubuntu-2404`](https://github.com/garys-gpu-benchmarks/bundle-nvidia-ubuntu-2404) | NVIDIA · Ubuntu 24.04 | 201–232 |
-| [`bundle-amd-ubuntu-2604`](https://github.com/garys-gpu-benchmarks/bundle-amd-ubuntu-2604) | AMD · Ubuntu 26.04 | 301–332 |
-| [`bundle-nvidia-ubuntu-2604`](https://github.com/garys-gpu-benchmarks/bundle-nvidia-ubuntu-2604) | NVIDIA · Ubuntu 26.04 | 401–432 |
+| 1 | Instructions per cycle, all commands combined | `instructions_per_cycle_ipc` |
+| 2 | Branch misprediction rate, all commands combined, pct | `branch_misprediction_rate` |
+| 3 | Cache misses per 1,000 instructions, all commands combined | `cache_misses_per_1000_instructions` |
+| 4 | Pipeline stalls, all commands combined, pct | `pipeline_stall_pct` |
+| 5 | Context switches per second, all commands combined | `context_switches_during_workload_switches_s` |
 
-## Suite Tools
+### Notes
 
-Four operator scripts from [`garys-gpu-benchmarks/gpu-bench-suite`](https://github.com/garys-gpu-benchmarks/gpu-bench-suite) work across the whole bundle. All four are also at the top of every bundle, and `show_metrics.sh` is at the top of this repository too; each script prints full usage with `--help`.
+- The smoke profile is a quick check with reduced sizes and iteration counts. Use `--baseline` or `--extended` for representative numbers.
+- Cloud VMs may hide the hardware PMU; the four PMU metrics then read na.
+- Non-root runs need perf_event_paranoid <= 2.
+- AMD Zen 2 and later may not count stalled-cycles-backend (stall reads na).
 
-- **`run_benchmark_suite.sh`** (on the GPU host) — runs the installed workloads one after another for each profile, writes one log to `/opt/benchmarks/benchmark_suite_log/`, and ends with a pass/fail summary.
-  ```bash
-  cd /opt/benchmarks
-  ./run_benchmark_suite.sh --dry-run                    # list what would run
-  ./run_benchmark_suite.sh -w 111 --smoke --baseline  # just this workload
-  ./run_benchmark_suite.sh --smoke                      # every workload, smoke profile
-  ./run_benchmark_suite.sh -r 20                        # soak: everything, 20 times
-  ```
-- **`get_benchmark_results.sh`** (on your laptop with `--host`, or on the GPU host without it) — copies the runtime ledger and every workload's `results/raw`, `results/parsed` and suite logs into `RUNTIME_LEDGERS/` and `DIRECTORIES/`. With `--host` it collects over one SSH connection; without `--host` it collects from the machine it runs on.
-  ```bash
-  git clone https://github.com/garys-gpu-benchmarks/gpu-bench-suite && cd gpu-bench-suite
-  ./scripts/get_benchmark_results.sh --host 203.0.113.10        # root@host, port 22
-  ./scripts/get_benchmark_results.sh --host ubuntu@203.0.113.10 --port 2222 -i ~/.ssh/id_ed25519 -o ~/results
-  /opt/benchmarks/get_benchmark_results.sh -o ~/results     # on the GPU host: this machine
-  ```
-- **`show_ledger_runs.sh`** (on your laptop with `--host`, or on the GPU host without it) — prints one line per run in the runtime ledger (workload, profile, runtime, exit code) and copies nothing. `--failed` lists only runs that did not exit 0.
-  ```bash
-  ./scripts/show_ledger_runs.sh --host 203.0.113.10           # from your laptop
-  /opt/benchmarks/show_ledger_runs.sh --failed            # on the GPU host
-  ```
-- **`show_metrics.sh`** (laptop or GPU host; included in this repository) — prints one workload's runs from the runtime ledger in fixed-width metric columns with per-profile means.
-  ```bash
-  ./show_metrics.sh 111                                        # from this repository, on the GPU host
-  cd /opt/benchmarks && ./show_metrics.sh 111             # or from the bundle
-  ./scripts/show_metrics.sh 111 --host 203.0.113.10            # over SSH, all profiles
-  ./scripts/show_metrics.sh 111 --baseline --file RUNTIME_LEDGERS/<ledger>.csv
-  ```
+## Output
 
-## 1. Overview
-
-Runs each yaml workload_commands entry under perf stat -x, and derives IPC, branch-mispredict percent, cache misses per 1,000 instructions, stall percent, and context switches/s. num_cpus substitutes into stress-ng. event_list adds perf events; unknown names are dropped. duration is seconds per command. Sweep dimensions: num_cpus, workload_commands, event_list, duration.
-
-## 2. What It Validates
-
-- Validates that each yaml stress-ng command completes under perf stat and that IPC, branch misprediction, cache-miss, pipeline-stall, and context-switch rates are parsed, or reported as na (<reason>) when the host does not expose a PMU counter
-- #1: Instructions per cycle, all commands combined (instructions_per_cycle_ipc); is present and physically sensible.
-- #2: Branch misprediction rate, all commands combined, pct (branch_misprediction_rate); is present and physically sensible.
-- #3: Cache misses per 1,000 instructions, all commands combined (cache_misses_per_1000_instructions); is present and physically sensible.
-- #4: Pipeline stalls, all commands combined, pct (pipeline_stall_pct); is present and physically sensible.
-- #5: Context switches per second, all commands combined (context_switches_during_workload_switches_s) is present and physically sensible.
-
-## 3. Metrics Captured
-
-- **#1: Instructions per cycle, all commands combined** — stored as `instructions_per_cycle_ipc`.
-- **#2: Branch misprediction rate, all commands combined, pct** — stored as `branch_misprediction_rate`.
-- **#3: Cache misses per 1,000 instructions, all commands combined** — stored as `cache_misses_per_1000_instructions`.
-- **#4: Pipeline stalls, all commands combined, pct** — stored as `pipeline_stall_pct`.
-- **#5: Context switches per second, all commands combined** — stored as `context_switches_during_workload_switches_s`.
-
-## 4. Hardware Requirements
-
-### Supported environment
-
-- OS: Ubuntu 24.04
-- GPU vendor: AMD
-- Framework family: Bash, SQLite, Python, PyYAML, Linux PMU, stress-ng
-- Python: Python 3.14.8 (uv-managed CPython from `uv python install 3.14`; all benchmark venvs). System Python 3.12.3 retained for OS and setup scripts only
-
-### Reference validation environment
-
-The tables below describe the machine used to generate the reference results. They are not a requirement that every user buy that exact cloud instance.
-
-### System
-
-Ubuntu 24.04 / AMD / Bash, SQLite, Python, PyYAML, Linux PMU, stress-ng
-
-### GPU
-
-Ubuntu 24.04 / AMD / Bash, SQLite, Python, PyYAML, Linux PMU, stress-ng
-
-## 5. Software Requirements
-
-| Component | Version |
+| Path | Contents |
 |---|---|
-| OS | Ubuntu 24.04 |
-| Kernel | kernel 6.8.0 |
-| Python | Python 3.14.8 (uv-managed CPython from `uv python install 3.14`; all benchmark venvs). System Python 3.12.3 retained for OS and setup scripts only |
-| ROCm | N/A - ROCm not used |
-| rocBLAS | N/A - rocBLAS not used |
+| `results/raw/<timestamp>_<repo>_<host>/` | Raw tool output, `metrics_summary.txt`, and `hardware_info.txt`, `software_info.txt`, `errors_info.txt` |
+| `results/benchmark.db` | SQLite history of every run |
+| `results/summary.json` | Metrics from the most recent run |
+| `/var/opt/benchmarks/runtime_ledger.csv` | One row per run, shared by every workload on the host |
 
-Runs each yaml workload_commands entry under perf stat -x, and derives IPC, branch-mispredict percent, cache misses per 1,000 instructions, stall percent, and context switches/s. num_cpus substitutes into stress-ng. event_list adds perf events; unknown names are dropped.
+Every run is checked for completeness and against any `thresholds:` or `baselines:` in `config/benchmark_config.yaml`. A run that fails the checks exits non-zero.
 
-## 6. Installation
+## Requirements
 
-```bash
-Run apt installed Linux perf (linux-tools-$(uname -r)) as perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command. stress-ng is the workload generator
-```
+- Ubuntu 24.04, root or sudo for `setup.sh`
+- Linux PMU, stress-ng, Python 3.14 (uv-managed). `setup.sh` installs what is missing; Python packages go into a repo-local `.venv`.
 
-## 7. Running the Benchmark
+## Run the Whole Bundle
 
-```bash
-Run apt installed Linux perf (linux-tools-$(uname -r)) as perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command. stress-ng is the workload generator
-```
-
-**Validating results separately:**
+This workload is also part of [`bundle-amd-ubuntu-2404`](https://github.com/garys-gpu-benchmarks/bundle-amd-ubuntu-2404), which holds all 32 AMD Ubuntu 24.04 workloads as submodules:
 
 ```bash
-export BENCHMARK_PYTHON=/usr/bin/python3.13  # optional
-python3 -m venv .venv
-source ".venv/bin/activate"
-".venv/bin/python" scripts/validate_results.py
+git clone --recurse-submodules https://github.com/garys-gpu-benchmarks/bundle-amd-ubuntu-2404 /opt/benchmarks
+cd /opt/benchmarks
+./run_benchmark_suite.sh -w 111 --smoke     # just this workload
+./run_benchmark_suite.sh --smoke            # all 32 workloads
+./show_metrics.sh 111                       # this workload's runs from the ledger
 ```
 
-## 8. Output
+The suite tools (`run_benchmark_suite.sh`, `get_benchmark_results.sh`, `show_ledger_runs.sh`, `show_metrics.sh`) are documented in [`gpu-bench-suite`](https://github.com/garys-gpu-benchmarks/gpu-bench-suite).
 
-### `results/benchmark.db` (SQLite)
+Other platforms: [NVIDIA 24.04](https://github.com/garys-gpu-benchmarks/bundle-nvidia-ubuntu-2404) (201–232), [AMD 26.04](https://github.com/garys-gpu-benchmarks/bundle-amd-ubuntu-2604) (301–332), [NVIDIA 26.04](https://github.com/garys-gpu-benchmarks/bundle-nvidia-ubuntu-2604) (401–432).
 
-CSV, one row per workload command (duplicated when only one command), plus perf_N.csv, perf_N.txt, and pmu_events.txt
+## Troubleshooting
 
-sample_index,status,workload_command,duration_sec,elapsed_sec,instructions_per_cycle_ipc,branch_misprediction_rate,cache_misses_per_1000_instructions,pipeline_stall_pct,context_switches_during_workload_switches_s,cycles,instructions,branches,branch_misses,cache_misses,stall_cycles,pipeline_stall_event,pmu_counter_running_pct,context_switches,cpu_time_sec,cpu_utilization_percent,stress_ng_bogo_ops_s,pmu_source,error_message
-0,ok,stress-ng,5,5.1,1.2,2.0,8.0,15,100,1e9,1.2e9,1e8,2e6,1e7,1.5e8,stalled-cycles-backend,100,500,4.8,96,1000,perf,
+- **SSH dropped during setup:** reconnect and run `sudo bash setup.sh --assume-yes` again. It resumes; do not delete `.venv` or `.cache`.
+- **A metric reads `na`:** the run could not measure it on this host. The reason is in the run's `metrics_summary.txt` and `errors_info.txt`; see also [Notes](#notes).
 
-```bash
-Run apt installed Linux perf (linux-tools-$(uname -r)) as perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command. stress-ng is the workload generator
-```
-
-### `results/summary.json`
-
-Consolidated metrics from the most recent run — suitable for CI artifact upload or dashboard ingestion.
-
-### `results/raw/<timestamp>.txt`
-
-CSV, one row per workload command (duplicated when only one command), plus perf_N.csv, perf_N.txt, and pmu_events.txt
-
-sample_index,status,workload_command,duration_sec,elapsed_sec,instructions_per_cycle_ipc,branch_misprediction_rate,cache_misses_per_1000_instructions,pipeline_stall_pct,context_switches_during_workload_switches_s,cycles,instructions,branches,branch_misses,cache_misses,stall_cycles,pipeline_stall_event,pmu_counter_running_pct,context_switches,cpu_time_sec,cpu_utilization_percent,stress_ng_bogo_ops_s,pmu_source,error_message
-0,ok,stress-ng,5,5.1,1.2,2.0,8.0,15,100,1e9,1.2e9,1e8,2e6,1e7,1.5e8,stalled-cycles-backend,100,500,4.8,96,1000,perf,
-
-## 9. Baselines / Thresholds
-
-Expected ranges and gates live in `config/benchmark_config.yaml` under `baselines:` or `thresholds:`. To update them, edit that file — never edit validation code directly.
-
-## 10. Troubleshooting
-
-**`setup.sh` missing collector**
-Create cannot finish without `scripts/collect_workload.py`.
-
-**`self_check` overlay rewritten**
-`Locked overlay rewritten` means the sibling file and the `sha256` in `results/overlay_lock.json` disagree. The repair is to make `implementation_components/<component-id>/files/<path>`, the sibling path, and that digest the same bytes, then recheck with `create_one_workload.py --validate-only`. Do not replace the overlay with a new collector, and do not regenerate a non-empty sibling.
-
-**Remote SSH drop during setup**
-Reconnect and resume `bash setup.sh --assume-yes`. Do not wipe `.venv` or `.cache`.
-
-## 11. NVIDIA H100 Coding Differences
-
-Primary target is AMD ROCm. NVIDIA notes in this section are reference only and are not the execution path.
-
-## Repository layout
+## Repository Layout
 
 ```text
 .
-├── setup.sh
-├── run_benchmark.sh
-├── benchmark_specification.json
-├── .github/workflows/      # thin CI callers (see Continuous Integration)
-├── config/
-├── scripts/
-├── src/
+├── setup.sh                      # installs dependencies and builds the benchmark
+├── run_benchmark.sh              # runs one profile, parses, validates
+├── show_metrics.sh               # prints this workload's ledger rows
+├── SPEC.md                       # engineering specification
+├── benchmark_specification.json  # workload definition
+├── config/                       # profile values and thresholds
+├── scripts/                      # build, collect, parse, validate
+├── docs/                         # PRD and contracts
 ├── tests/
-├── docs/
-├── results/
+├── results/                      # run outputs
 └── LICENSE
 ```
 
 ## Continuous Integration
 
-| Workflow | Runs on | When | What it does |
-|---|---|---|---|
-| [CI](.github/workflows/ci.yml) | GitHub-hosted runner | every pull request, and every push to `main` | shellcheck, ruff, `bash -n`, `compileall`, `run_benchmark.sh --help`, specification schema, the results validator on a seeded fixture, required files, and actionlint. No GPU and no benchmark run. |
-| [GPU Smoke Benchmark](.github/workflows/gpu-smoke.yml) | self-hosted runner labeled `gpu`, `amd`, `ubu2404` | only when started by hand: **Actions → GPU Smoke Benchmark → Run workflow** (choose `smoke`, `baseline` or `extended`) | Verifies the pre-provisioned GPU stack, records `results/environment.json` (driver, runtime, kernel, GPU), runs the profile, shows headline metrics on the run page, and uploads the results. |
+- [CI](.github/workflows/ci.yml) runs lint and static checks on every pull request and push to `main`. It does not run the benchmark.
+- [GPU Smoke Benchmark](.github/workflows/gpu-smoke.yml) runs a profile on a self-hosted runner labeled `gpu`, `amd`, `ubu2404`. It only starts by hand (**Actions → GPU Smoke Benchmark → Run workflow**), so pull requests and forks cannot run it.
 
-Both files are short callers. The steps themselves live once, for every workload in the suite, in [`garys-gpu-benchmarks/shared-workflows`](https://github.com/garys-gpu-benchmarks/shared-workflows), pinned at `@v1`. The GPU workflow is never triggered by pull requests, so code from a fork cannot run on the GPU host.
-
-The GPU Smoke Benchmark workflow runs one workload. To install and run the whole AMD Ubuntu 24.04 bundle by hand on the same machines, see [Download as a Bundle](#download-as-a-bundle) and [Suite Tools](#suite-tools).
+Both workflows call shared steps in [`shared-workflows@v1`](https://github.com/garys-gpu-benchmarks/shared-workflows).
