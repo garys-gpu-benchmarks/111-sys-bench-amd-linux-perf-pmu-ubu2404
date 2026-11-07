@@ -35,6 +35,11 @@
     "value": "Analyze CPU IPC, branch, cache, and stall behavior under load"
   },
   {
+    "field_name": "Command Tools Executed",
+    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
+    "value": "Run perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command"
+  },
+  {
     "field_name": "Metrics",
     "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
     "value": "#1: Instructions per cycle, all commands combined (instructions_per_cycle_ipc); #2: Branch misprediction rate, all commands combined, pct (branch_misprediction_rate); #3: Cache misses per 1,000 instructions, all commands combined (cache_misses_per_1000_instructions); #4: Pipeline stalls, all commands combined, pct (pipeline_stall_pct); #5: Context switches per second, all commands combined (context_switches_during_workload_switches_s)"
@@ -140,16 +145,6 @@
     "value": "-"
   },
   {
-    "field_name": "Validation Objective",
-    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
-    "value": "Validates perf-stat IPC, mispredict, cache-miss, stall, and context-switch rates, or na if a counter is missing"
-  },
-  {
-    "field_name": "Command Tools Executed",
-    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
-    "value": "Run perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command"
-  },
-  {
     "field_name": "run_benchmark Command Plus Options for Smoke Run (One minute or less)",
     "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
     "value": "bash run_benchmark.sh --smoke --validate --num-cpus 1 --workload-commands \"stress-ng --cpu {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --cache {num_cpus} --timeout {duration}s --metrics-brief\" --event-list cycles,cpu-cycles,instructions,branches,branch-misses,cache-references,cache-misses,L1-dcache-loads,L1-dcache-load-misses,LLC-loads,LLC-load-misses,dTLB-load-misses,iTLB-load-misses,stalled-cycles-frontend,stalled-cycles-backend,context-switches --duration 2"
@@ -163,6 +158,11 @@
     "field_name": "run_benchmark Command Plus Options for Extended Run (8 to 15 minutes)",
     "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
     "value": "bash run_benchmark.sh --extended --validate --num-cpus 4 --workload-commands \"stress-ng --cpu {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --cache {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --branch {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --vm {num_cpus} --vm-bytes 64M --timeout {duration}s --metrics-brief\" --event-list cycles,cpu-cycles,instructions,branches,branch-misses,cache-references,cache-misses,L1-dcache-loads,L1-dcache-load-misses,LLC-loads,LLC-load-misses,dTLB-load-misses,iTLB-load-misses,stalled-cycles-frontend,stalled-cycles-backend,context-switches --duration 150"
+  },
+  {
+    "field_name": "Validation Objective",
+    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
+    "value": "Validates perf-stat IPC, mispredict, cache-miss, stall, and context-switch rates, or na if a counter is missing"
   },
   {
     "field_name": "Command Execution Details and Purpose",
