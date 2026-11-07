@@ -31,8 +31,32 @@ Profiles (default: --smoke):
 
 Parameters (override the profile's value):
   --num-cpus <value>            Shared workload parameter (smoke 1, baseline 2, extended 4)
-  --workload-commands <value>   Shared workload parameter (smoke stress-ng --cpu {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --cache {num_cpus} --timeout {duration}s --metrics-brief, baseline stress-ng --cpu {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --cache {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --branch {num_cpus} --timeout {duration}s --metrics-brief, extended stress-ng --cpu {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --cache {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --branch {num_cpus} --timeout {duration}s --metrics-brief,stress-ng --vm {num_cpus} --vm-bytes 64M --timeout {duration}s --metrics-brief)
-  --event-list <value>          Shared workload parameter (smoke/baseline/extended: cycles,cpu-cycles,instructions,branches,branch-misses,cache-references,cache-misses,L1-dcache-loads,L1-dcache-load-misses,LLC-loads,LLC-load-misses,dTLB-load-misses,iTLB-load-misses,stalled-cycles-frontend,stalled-cycles-backend,context-switches)
+  --workload-commands <value>   Shared workload parameter
+                                  smoke:    stress-ng --cpu {num_cpus} --timeout {duration}s
+                                            --metrics-brief,
+                                            stress-ng --cache {num_cpus} --timeout {duration}s
+                                            --metrics-brief
+                                  baseline: stress-ng --cpu {num_cpus} --timeout {duration}s
+                                            --metrics-brief,
+                                            stress-ng --cache {num_cpus} --timeout {duration}s
+                                            --metrics-brief,
+                                            stress-ng --branch {num_cpus} --timeout {duration}s
+                                            --metrics-brief
+                                  extended: stress-ng --cpu {num_cpus} --timeout {duration}s
+                                            --metrics-brief,
+                                            stress-ng --cache {num_cpus} --timeout {duration}s
+                                            --metrics-brief,
+                                            stress-ng --branch {num_cpus} --timeout {duration}s
+                                            --metrics-brief,
+                                            stress-ng --vm {num_cpus} --vm-bytes 64M --timeout
+                                            {duration}s --metrics-brief
+  --event-list <value>          Shared workload parameter
+                                  all profiles: cycles,cpu-cycles,instructions,branches,
+                                                branch-misses,cache-references,cache-misses,
+                                                L1-dcache-loads,L1-dcache-load-misses,LLC-loads,
+                                                LLC-load-misses,dTLB-load-misses,iTLB-load-misses,
+                                                stalled-cycles-frontend,stalled-cycles-backend,
+                                                context-switches
   --duration <n>                Wall-clock or sampling duration (smoke 2, baseline 70, extended 150)
 
 General options:
