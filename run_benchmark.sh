@@ -19,10 +19,10 @@ usage() {
 
 Usage: bash run_benchmark.sh [OPTIONS]
 
-Workload Name:          Linux perf PMU Analysis Harness.
-Main Goal:              Analyze CPU IPC, branch, cache, and stall behavior under load.
+Workload Name:          Linux perf PMU Analysis Harness
+Main Goal:              Analyze CPU IPC, branch, cache, and stall behavior under load
 Command Tools Executed: Run perf stat -x, -e <events> -- <stress-ng command> for each yaml workload
-                        command.
+                        command
 
 Profiles (default: --smoke):
   --smoke                       Run smoke profile

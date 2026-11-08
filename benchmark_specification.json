@@ -205,14 +205,14 @@
     "value": "MI300X"
   },
   {
-    "field_name": "Raw Output Format",
-    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
-    "value": "CSV, one row per workload command (duplicated when only one command), plus perf_N.csv, perf_N.txt, and pmu_events.txt"
-  },
-  {
     "field_name": "Primary Record Granularity",
     "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
     "value": "one CSV row per yaml workload command"
+  },
+  {
+    "field_name": "Raw Output Format",
+    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
+    "value": "CSV, one row per workload command (duplicated when only one command), plus perf_N.csv, perf_N.txt, and pmu_events.txt"
   },
   {
     "field_name": "Raw Output Example",
@@ -225,14 +225,14 @@
     "value": "instructions_per_cycle_ipc, branch_misprediction_rate, cache_misses_per_1000_instructions, pipeline_stall_pct, context_switches_during_workload_switches_s. Also recorded: cycles, instructions, branches, branch_misses, cache_misses, stall_cycles, pipeline_stall_event, pmu_counter_running_pct, context_switches, cpu_time_sec, cpu_utilization_percent, stress_ng_bogo_ops_s, pmu_source"
   },
   {
-    "field_name": "Success Criteria",
-    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
-    "value": "Each yaml stress-ng command exits 0, two or more samples parse into SQLite, and validation passes. The four PMU metrics are finite numbers or na (<reason>); context switches/s is always a number. Missing stress-ng or a failed workload fails the run"
-  },
-  {
     "field_name": "Parser and Normalization Notes",
     "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
     "value": "Each metric is the mean over workload rows. A counter perf did not count is na (<reason>), never 0 or a floor. pmu_counter_running_pct below 100 means perf multiplexed more events than hardware counters and scaled the counts. cache-misses is perf's generic event (last-level cache on Intel)"
+  },
+  {
+    "field_name": "Success Criteria",
+    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
+    "value": "Each yaml stress-ng command exits 0, two or more samples parse into SQLite, and validation passes. The four PMU metrics are finite numbers or na (<reason>); context switches/s is always a number. Missing stress-ng or a failed workload fails the run"
   },
   {
     "field_name": "Hardware Config",
