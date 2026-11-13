@@ -40,6 +40,11 @@
     "value": "Run perf stat -x, -e <events> -- <stress-ng command> for each yaml workload command"
   },
   {
+    "field_name": "Execution Description With Parameters",
+    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
+    "value": "Runs each yaml workload_commands entry under perf stat -x, and derives IPC, branch-mispredict percent, cache misses per 1,000 instructions, stall percent, and context switches/s. num_cpus substitutes into stress-ng. event_list adds perf events; unknown names are dropped. duration is seconds per command. The stall event is cycle_activity.stalls_total on Intel and stalled-cycles-backend on AMD. If perf cannot open events, the command still runs and the four PMU metrics read na"
+  },
+  {
     "field_name": "Metrics",
     "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
     "value": "#1: Instructions per cycle, all commands combined (instructions_per_cycle_ipc); #2: Branch misprediction rate, all commands combined, pct (branch_misprediction_rate); #3: Cache misses per 1,000 instructions, all commands combined (cache_misses_per_1000_instructions); #4: Pipeline stalls, all commands combined, pct (pipeline_stall_pct); #5: Context switches per second, all commands combined (context_switches_during_workload_switches_s)"
@@ -173,11 +178,6 @@
     "field_name": "Command Methodology",
     "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
     "value": "Run each yaml workload command under perf stat -x,, counting cycles, instructions, branches, branch-misses, cache-misses, context-switches, the stall event, and event_list. Intel uses cycle_activity.stalls_total; AMD uses stalled-cycles-backend. IPC is instructions/cycles. Mispredict percent, misses per 1,000 instructions, and stall percent are those ratios times 100, 1000, and 100. If perf cannot open events, the command still runs, the four PMU metrics read na, and context switches come from getrusage"
-  },
-  {
-    "field_name": "Execution Description With Parameters",
-    "source_file": "BenchmarkSpecDefinitions.xlsx::Workload_Definitions",
-    "value": "Runs each yaml workload_commands entry under perf stat -x, and derives IPC, branch-mispredict percent, cache misses per 1,000 instructions, stall percent, and context switches/s. num_cpus substitutes into stress-ng. event_list adds perf events; unknown names are dropped. duration is seconds per command. The stall event is cycle_activity.stalls_total on Intel and stalled-cycles-backend on AMD. If perf cannot open events, the command still runs and the four PMU metrics read na"
   },
   {
     "field_name": "Execution Domain",
