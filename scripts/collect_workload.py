@@ -514,7 +514,6 @@ def main() -> int:
         writer.writerow({"sample_index": index, **row})
     Path(args.raw_file).parent.mkdir(parents=True, exist_ok=True)
     Path(args.raw_file).write_text(buf.getvalue(), encoding="utf-8")
-    print(buf.getvalue(), end="")
     return 0
 
 
