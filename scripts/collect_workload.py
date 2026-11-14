@@ -507,8 +507,6 @@ def main() -> int:
             detail_writer.writerow({"sample_index": index, **row})
         (run_dir / "per_command_results.csv").write_text(detail.getvalue(), encoding="utf-8")
         rows = [combine_rows(rows, cpu_count)]
-    if len(rows) == 1:
-        rows.append(dict(rows[0]))  # the harness requires at least two sample rows
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=HEADER, extrasaction="ignore", lineterminator="\n")
     writer.writeheader()
